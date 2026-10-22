@@ -7,7 +7,7 @@ const resetButton = document.getElementById("resetButton");
 const downloadButton = document.getElementById("downloadButton");
 
 const overlay = new Image();
-overlay.src = "square-format-twibbon.png";
+overlay.src = "./square-format-twibbon.png";
 
 let photo = null;
 
