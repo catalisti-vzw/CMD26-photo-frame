@@ -5,6 +5,9 @@ const photoInput = document.getElementById("photoInput");
 const resetButton = document.getElementById("resetButton");
 const downloadButton = document.getElementById("downloadButton");
 
+const copyButton = document.getElementById("copyButton");
+const shareText = document.getElementById("shareText");
+
 const overlay = new Image();
 
 let photo = null;
@@ -546,6 +549,31 @@ downloadButton.addEventListener("click", function () {
     drawEditor();
 });
 
+// COPY LINKEDIN POST TEXT
+
+copyButton.addEventListener("click", async function () {
+
+    const text = shareText.innerText;
+
+    try {
+        await navigator.clipboard.writeText(text);
+
+        const originalText = copyButton.innerText;
+
+        copyButton.innerText = "Copied! ✓";
+
+        setTimeout(function () {
+            copyButton.innerText = originalText;
+        }, 2000);
+
+    } catch (error) {
+        console.error("Could not copy text:", error);
+
+        alert(
+            "Copy this text manually:\n\n" + text
+        );
+    }
+});
 
 // INITIAL VIEW
 
