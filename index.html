@@ -1,4 +1,86 @@
-CMD26 Photo Frame Generator
-Upload your photo and create your personalised Catalisti & Moonshot Day 2026 profile picture.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-Our photo generator is coming soon.
+    <title>CMD26 Photo Frame</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <main>
+
+        <div class="intro">
+            <p class="label">CATALISTI & MOONSHOT FLANDERS</p>
+
+            <h1>Create your CMD26 profile picture</h1>
+
+            <p class="subtitle">
+                Upload your photo, adjust it and download your
+                Catalisti & Moonshot Day 2026 profile picture.
+            </p>
+        </div>
+
+        <div class="generator">
+
+            <div class="preview">
+                <canvas id="canvas" width="1080" height="1080"></canvas>
+            </div>
+
+            <div class="controls">
+
+                <section>
+                    <h2>1. Upload your photo</h2>
+
+                    <label class="upload-button">
+                        Choose photo
+                        <input
+                            type="file"
+                            id="photoUpload"
+                            accept="image/*"
+                            hidden
+                        >
+                    </label>
+                </section>
+
+                <section>
+                    <h2>2. Adjust your photo</h2>
+
+                    <label for="zoom">Zoom</label>
+
+                    <input
+                        type="range"
+                        id="zoom"
+                        min="1"
+                        max="3"
+                        step="0.01"
+                        value="1"
+                    >
+                </section>
+
+                <section>
+                    <h2>3. Download</h2>
+
+                    <button id="downloadButton" disabled>
+                        Download image
+                    </button>
+                </section>
+
+                <p class="privacy">
+                    Your photo is processed locally in your browser
+                    and is not uploaded to our server.
+                </p>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
