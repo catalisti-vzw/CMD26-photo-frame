@@ -1,135 +1,201 @@
-* {
-    box-sizing: border-box;
-}
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
-body {
-    margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    background: #f5f5f5;
-    color: #222;
-}
+const photoInput = document.getElementById("photoInput");
+const zoomSlider = document.getElementById("zoom");
+const resetButton = document.getElementById("resetButton");
+const downloadButton = document.getElementById("downloadButton");
 
-main {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 60px 30px;
-}
+const overlay = new Image();
+overlay.src = "square-format-twibbon.png";
 
-.intro {
-    margin-bottom: 40px;
-}
+let photo = null;
 
-.label {
-    color: #009982;
-    font-size: 14px;
-    font-weight: bold;
-    letter-spacing: 1.5px;
-}
+let zoom = 1;
+let offsetX = 0;
+let offsetY = 0;
 
-h1 {
-    margin: 8px 0 15px;
-    font-size: 48px;
-    line-height: 1.1;
-}
+let dragging = false;
+let lastX = 0;
+let lastY = 0;
 
-.subtitle {
-    max-width: 650px;
-    color: #666;
-    font-size: 18px;
-    line-height: 1.6;
-}
 
-.generator {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 340px;
-    gap: 40px;
-    align-items: start;
-}
+// DRAW CANVAS
 
-.preview {
-    padding: 12px;
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-}
+function draw() {
 
-canvas {
-    display: block;
-    width: 100%;
-    height: auto;
-    border-radius: 12px;
-    background: #eaeaea;
-}
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-.controls {
-    padding: 28px;
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-}
+    // Draw uploaded photograph
 
-section {
-    margin-bottom: 32px;
-}
+    if (photo) {
 
-h2 {
-    margin: 0 0 16px;
-    font-size: 18px;
-}
+        const baseScale = Math.max(
+            canvas.width / photo.width,
+            canvas.height / photo.height
+        );
 
-.upload-button,
-button {
-    display: block;
-    width: 100%;
-    padding: 16px 20px;
-    border: 0;
-    border-radius: 10px;
+        const scale = baseScale * zoom;
 
-    background: #008c77;
-    color: white;
+        const width = photo.width * scale;
+        const height = photo.height * scale;
 
-    font-size: 16px;
-    font-weight: bold;
-    text-align: center;
+        const x = (canvas.width - width) / 2 + offsetX;
+        const y = (canvas.height - height) / 2 + offsetY;
 
-    cursor: pointer;
-}
-
-.upload-button:hover,
-button:hover:not(:disabled) {
-    background: #006f60;
-}
-
-button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-input[type="range"] {
-    width: 100%;
-    margin-top: 12px;
-    accent-color: #008c77;
-}
-
-.privacy {
-    margin: 0;
-    color: #777;
-    font-size: 12px;
-    line-height: 1.5;
-}
-
-@media (max-width: 800px) {
-
-    main {
-        padding: 35px 20px;
+        ctx.drawImage(
+            photo,
+            x,
+            y,
+            width,
+            height
+        );
     }
 
-    h1 {
-        font-size: 36px;
-    }
+    // Draw CMD26 artwork on top
 
-    .generator {
-        grid-template-columns: 1fr;
+    if (overlay.complete) {
+        ctx.drawImage(
+            overlay,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
     }
-
 }
+
+
+// LOAD OVERLAY
+
+overlay.onload = draw;
+
+
+// UPLOAD PHOTO
+
+photoInput.addEventListener("change", function(event) {
+
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+
+        const img = new Image();
+
+        img.onload = function() {
+
+            photo = img;
+
+            zoom = 1;
+            offsetX = 0;
+            offsetY = 0;
+
+            zoomSlider.value = 1;
+
+            downloadButton.disabled = false;
+
+            draw();
+        };
+
+        img.src = e.target.result;
+    };
+
+    reader.readAsDataURL(file);
+});
+
+
+// ZOOM
+
+zoomSlider.addEventListener("input", function() {
+
+    zoom = parseFloat(this.value);
+
+    draw();
+});
+
+
+// RESET
+
+resetButton.addEventListener("click", function() {
+
+    zoom = 1;
+    offsetX = 0;
+    offsetY = 0;
+
+    zoomSlider.value = 1;
+
+    draw();
+});
+
+
+// START DRAGGING
+
+canvas.addEventListener("pointerdown", function(event) {
+
+    if (!photo) return;
+
+    dragging = true;
+
+    lastX = event.clientX;
+    lastY = event.clientY;
+
+    canvas.setPointerCapture(event.pointerId);
+});
+
+
+// DRAG PHOTO
+
+canvas.addEventListener("pointermove", function(event) {
+
+    if (!dragging || !photo) return;
+
+    const rect = canvas.getBoundingClientRect();
+
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    const dx = (event.clientX - lastX) * scaleX;
+    const dy = (event.clientY - lastY) * scaleY;
+
+    offsetX += dx;
+    offsetY += dy;
+
+    lastX = event.clientX;
+    lastY = event.clientY;
+
+    draw();
+});
+
+
+// STOP DRAGGING
+
+canvas.addEventListener("pointerup", function() {
+    dragging = false;
+});
+
+canvas.addEventListener("pointercancel", function() {
+    dragging = false;
+});
+
+
+// DOWNLOAD
+
+downloadButton.addEventListener("click", function() {
+
+    draw();
+
+    const link = document.createElement("a");
+
+    link.download = "CMD26-profile-picture.png";
+    link.href = canvas.toDataURL("image/png");
+
+    link.click();
+});
+
+
+// INITIAL DRAW
+
+draw();
