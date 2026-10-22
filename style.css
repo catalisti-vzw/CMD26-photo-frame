@@ -107,6 +107,7 @@ h2 {
 }
 
 .download-button:disabled {
+    color: #21386C;
     background: #EAF2FA;
     cursor: not-allowed;
 }
