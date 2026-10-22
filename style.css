@@ -158,10 +158,10 @@ h2 {
     color: #13182D;
 }
 
-button.share-button {
+#copyButton {
     display: block;
     width: 100%;
-    padding: 14px 16px;
+    padding: 15px;
     margin: 0 0 10px 0;
 
     background-color: #EAF2FA;
@@ -171,29 +171,25 @@ button.share-button {
     border-radius: 8px;
 
     font-family: "Lato", Arial, Helvetica, sans-serif;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
-    line-height: 1.2;
 
     text-align: center;
     cursor: pointer;
 
     appearance: none;
     -webkit-appearance: none;
-
-    transition:
-        background-color 0.2s ease,
-        color 0.2s ease;
 }
 
-button.share-button:hover {
+#copyButton:hover {
     background-color: #13182D;
     color: #FFFFFF;
 }
 
-button.share-button:active {
+#copyButton:active {
     background-color: #21386C;
     border-color: #21386C;
+    color: #FFFFFF;
 }
 
 .linkedin-button {
