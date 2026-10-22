@@ -117,16 +117,20 @@ h2 {
     margin: 12px 0;
 }
 
-.secondary-button {
-    padding: 10px 14px;
-    border: 1px solid #13182D;
-    border-radius: 7px;
-    background: white;
+#resetButton {
+    width: 100%;
+    padding: 15px;
+    background: #ffffff;
+    color: #009984;
+    border: 2px solid #009984;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
     cursor: pointer;
 }
 
-.secondary-button:hover {
-    background: #EAF2FA;
+#resetButton:hover {
+    background: #f0faf8;
 }
 
 .privacy {
