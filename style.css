@@ -93,7 +93,7 @@ h2 {
     padding: 15px;
     border: none;
     border-radius: 8px;
-    background: #006b5b;
+    background: #13182D;
     color: white;
     font-size: 16px;
     font-weight: bold;
@@ -103,11 +103,11 @@ h2 {
 
 .upload-button:hover,
 .download-button:hover {
-    background: #005449;
+    background: #21386C;
 }
 
 .download-button:disabled {
-    background: #b4bec4;
+    background: #EAF2FA;
     cursor: not-allowed;
 }
 
