@@ -232,6 +232,27 @@ function getHandleAtPosition(x, y) {
     return null;
 }
 
+// UPDATE MOUSE CURSOR TO RESIZE ICON
+function updateCursor(event) {
+    if (!photo || action) return;
+
+    const position = getCanvasPosition(event);
+    const handle = getHandleAtPosition(position.x, position.y);
+
+    if (handle === "topLeft" || handle === "bottomRight") {
+        canvas.style.cursor = "nwse-resize";
+    } 
+    else if (handle === "topRight" || handle === "bottomLeft") {
+        canvas.style.cursor = "nesw-resize";
+    } 
+    else if (isInsidePhoto(position.x, position.y)) {
+        canvas.style.cursor = "move";
+    } 
+    else {
+        canvas.style.cursor = "default";
+    }
+}
+
 
 // CHECK WHETHER THE PHOTO WAS SELECTED
 
@@ -289,12 +310,22 @@ canvas.addEventListener("pointerdown", function (event) {
     );
 
     if (activeHandle) {
-        action = "resize";
-    } else if (isInsidePhoto(position.x, position.y)) {
-        action = "move";
+    action = "resize";
+
+    if (activeHandle === "topLeft" || activeHandle === "bottomRight") {
+        canvas.style.cursor = "nwse-resize";
     } else {
-        return;
+        canvas.style.cursor = "nesw-resize";
     }
+
+} else if (isInsidePhoto(position.x, position.y)) {
+
+    action = "move";
+    canvas.style.cursor = "grabbing";
+
+} else {
+    return;
+}
 
     startPointerX = position.x;
     startPointerY = position.y;
@@ -308,7 +339,7 @@ canvas.addEventListener("pointerdown", function (event) {
 });
 
 
-// MOVE OR RESIZE
+// MOVE 
 
 canvas.addEventListener("pointermove", function (event) {
     if (!action || !photo) return;
@@ -336,6 +367,15 @@ canvas.addEventListener("pointermove", function (event) {
     drawEditor();
 });
 
+// RESIZE
+
+canvas.addEventListener("pointermove", updateCursor);
+
+canvas.addEventListener("pointerleave", function () {
+    if (!action) {
+        canvas.style.cursor = "default";
+    }
+});
 
 // KEEP THE ASPECT RATIO WHILE RESIZING
 
