@@ -158,27 +158,42 @@ h2 {
     color: #13182D;
 }
 
-.share-button {
+button.share-button {
+    display: block;
     width: 100%;
-    padding: 15px;
-    margin-bottom: 10px;
+    padding: 14px 16px;
+    margin: 0 0 10px 0;
 
-    background: #EAF2FA;
+    background-color: #EAF2FA;
     color: #13182D;
 
-    border: 2px solid #EAF2FA;
+    border: 2px solid #13182D;
     border-radius: 8px;
 
-    font-size: 16px;
-    font-weight: bold;
+    font-family: "Lato", Arial, Helvetica, sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.2;
 
+    text-align: center;
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease;
+
+    appearance: none;
+    -webkit-appearance: none;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
 }
 
-.share-button:hover {
-    background: #DCE9F5;
-    border-color: #DCE9F5;
+button.share-button:hover {
+    background-color: #13182D;
+    color: #FFFFFF;
+}
+
+button.share-button:active {
+    background-color: #21386C;
+    border-color: #21386C;
 }
 
 .linkedin-button {
