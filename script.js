@@ -2,59 +2,117 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
 const photoInput = document.getElementById("photoInput");
-const zoomSlider = document.getElementById("zoom");
 const resetButton = document.getElementById("resetButton");
 const downloadButton = document.getElementById("downloadButton");
 
 const overlay = new Image();
-overlay.src = "./square-format-twibbon.png";
 
 let photo = null;
 
-let zoom = 1;
-let offsetX = 0;
-let offsetY = 0;
+// Position and size of the uploaded photograph
+let photoX = 0;
+let photoY = 0;
+let photoWidth = 0;
+let photoHeight = 0;
 
-let dragging = false;
-let lastX = 0;
-let lastY = 0;
+// Original image aspect ratio
+let photoAspectRatio = 1;
+
+// Interaction state
+let action = null;
+let activeHandle = null;
+
+let startPointerX = 0;
+let startPointerY = 0;
+
+let startPhotoX = 0;
+let startPhotoY = 0;
+let startPhotoWidth = 0;
+let startPhotoHeight = 0;
+
+// Handle appearance
+const handleRadius = 17;
+const minimumPhotoWidth = 120;
+
+// The overlay opacity shown while editing
+const editingOverlayOpacity = 0.65;
 
 
-// DRAW CANVAS
+// LOAD THE CMD26 OVERLAY
 
-function draw() {
+overlay.onload = function () {
+    drawEditor();
+};
 
+overlay.onerror = function () {
+    console.error("The CMD26 overlay could not be loaded.");
+};
+
+overlay.src = "./square-format-twibbon.png";
+
+
+// INITIAL PHOTO SIZE
+
+function resetPhoto() {
+    if (!photo) return;
+
+    /*
+    Fit the complete photograph inside the canvas initially.
+    This ensures that all four corner handles remain visible.
+    */
+
+    const fitScale = Math.min(
+        canvas.width / photo.width,
+        canvas.height / photo.height
+    );
+
+    photoWidth = photo.width * fitScale;
+    photoHeight = photo.height * fitScale;
+
+    photoX = (canvas.width - photoWidth) / 2;
+    photoY = (canvas.height - photoHeight) / 2;
+
+    drawEditor();
+}
+
+
+// DRAW THE EDITING VIEW
+
+function drawEditor() {
+    drawComposition(true);
+}
+
+
+// DRAW THE COMPLETE COMPOSITION
+
+function drawComposition(editing) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw uploaded photograph
+    // Neutral background
+    ctx.fillStyle = "#eeeeee";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Uploaded photograph
     if (photo) {
-
-        const baseScale = Math.max(
-            canvas.width / photo.width,
-            canvas.height / photo.height
-        );
-
-        const scale = baseScale * zoom;
-
-        const width = photo.width * scale;
-        const height = photo.height * scale;
-
-        const x = (canvas.width - width) / 2 + offsetX;
-        const y = (canvas.height - height) / 2 + offsetY;
-
         ctx.drawImage(
             photo,
-            x,
-            y,
-            width,
-            height
+            photoX,
+            photoY,
+            photoWidth,
+            photoHeight
         );
     }
 
-    // Draw CMD26 artwork on top
+    // CMD26 overlay
+    if (overlay.complete && overlay.naturalWidth > 0) {
+        ctx.save();
 
-    if (overlay.complete) {
+        /*
+        The frame is partly transparent during editing,
+        but fully opaque in the downloaded image.
+        */
+        ctx.globalAlpha = editing ? editingOverlayOpacity : 1;
+
         ctx.drawImage(
             overlay,
             0,
@@ -62,130 +120,328 @@ function draw() {
             canvas.width,
             canvas.height
         );
+
+        ctx.restore();
+    }
+
+    // Selection rectangle and handles are only visible while editing
+    if (editing && photo) {
+        drawSelectionControls();
     }
 }
 
 
-// LOAD OVERLAY
+// DRAW SELECTION RECTANGLE AND CORNER HANDLES
 
-overlay.onload = draw;
+function drawSelectionControls() {
+    ctx.save();
+
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 4;
+    ctx.setLineDash([14, 10]);
+
+    ctx.strokeRect(
+        photoX,
+        photoY,
+        photoWidth,
+        photoHeight
+    );
+
+    ctx.setLineDash([]);
+
+    const handles = getHandles();
+
+    Object.values(handles).forEach(function (handle) {
+        ctx.beginPath();
+
+        ctx.arc(
+            handle.x,
+            handle.y,
+            handleRadius,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+
+        ctx.lineWidth = 6;
+        ctx.strokeStyle = "#009984";
+        ctx.stroke();
+    });
+
+    ctx.restore();
+}
+
+
+// GET THE FOUR CORNER POSITIONS
+
+function getHandles() {
+    return {
+        topLeft: {
+            x: photoX,
+            y: photoY
+        },
+
+        topRight: {
+            x: photoX + photoWidth,
+            y: photoY
+        },
+
+        bottomLeft: {
+            x: photoX,
+            y: photoY + photoHeight
+        },
+
+        bottomRight: {
+            x: photoX + photoWidth,
+            y: photoY + photoHeight
+        }
+    };
+}
+
+
+// CONVERT SCREEN POSITION TO CANVAS POSITION
+
+function getCanvasPosition(event) {
+    const rect = canvas.getBoundingClientRect();
+
+    return {
+        x: (event.clientX - rect.left) * (canvas.width / rect.width),
+        y: (event.clientY - rect.top) * (canvas.height / rect.height)
+    };
+}
+
+
+// CHECK WHETHER A HANDLE WAS SELECTED
+
+function getHandleAtPosition(x, y) {
+    const handles = getHandles();
+
+    for (const [name, handle] of Object.entries(handles)) {
+        const distance = Math.hypot(
+            x - handle.x,
+            y - handle.y
+        );
+
+        if (distance <= handleRadius * 2.2) {
+            return name;
+        }
+    }
+
+    return null;
+}
+
+
+// CHECK WHETHER THE PHOTO WAS SELECTED
+
+function isInsidePhoto(x, y) {
+    return (
+        x >= photoX &&
+        x <= photoX + photoWidth &&
+        y >= photoY &&
+        y <= photoY + photoHeight
+    );
+}
 
 
 // UPLOAD PHOTO
 
-photoInput.addEventListener("change", function(event) {
-
+photoInput.addEventListener("change", function (event) {
     const file = event.target.files[0];
 
     if (!file) return;
 
     const reader = new FileReader();
 
-    reader.onload = function(e) {
+    reader.onload = function (readerEvent) {
+        const image = new Image();
 
-        const img = new Image();
+        image.onload = function () {
+            photo = image;
 
-        img.onload = function() {
+            photoAspectRatio = photo.width / photo.height;
 
-            photo = img;
-
-            zoom = 1;
-            offsetX = 0;
-            offsetY = 0;
-
-            zoomSlider.value = 1;
+            resetPhoto();
 
             downloadButton.disabled = false;
-
-            draw();
         };
 
-        img.src = e.target.result;
+        image.src = readerEvent.target.result;
     };
 
     reader.readAsDataURL(file);
 });
 
 
-// ZOOM
+// START MOVING OR RESIZING
 
-zoomSlider.addEventListener("input", function() {
-
-    zoom = parseFloat(this.value);
-
-    draw();
-});
-
-
-// RESET
-
-resetButton.addEventListener("click", function() {
-
-    zoom = 1;
-    offsetX = 0;
-    offsetY = 0;
-
-    zoomSlider.value = 1;
-
-    draw();
-});
-
-
-// START DRAGGING
-
-canvas.addEventListener("pointerdown", function(event) {
-
+canvas.addEventListener("pointerdown", function (event) {
     if (!photo) return;
 
-    dragging = true;
+    event.preventDefault();
 
-    lastX = event.clientX;
-    lastY = event.clientY;
+    const position = getCanvasPosition(event);
+
+    activeHandle = getHandleAtPosition(
+        position.x,
+        position.y
+    );
+
+    if (activeHandle) {
+        action = "resize";
+    } else if (isInsidePhoto(position.x, position.y)) {
+        action = "move";
+    } else {
+        return;
+    }
+
+    startPointerX = position.x;
+    startPointerY = position.y;
+
+    startPhotoX = photoX;
+    startPhotoY = photoY;
+    startPhotoWidth = photoWidth;
+    startPhotoHeight = photoHeight;
 
     canvas.setPointerCapture(event.pointerId);
 });
 
 
-// DRAG PHOTO
+// MOVE OR RESIZE
 
-canvas.addEventListener("pointermove", function(event) {
+canvas.addEventListener("pointermove", function (event) {
+    if (!action || !photo) return;
 
-    if (!dragging || !photo) return;
+    event.preventDefault();
 
-    const rect = canvas.getBoundingClientRect();
+    const position = getCanvasPosition(event);
 
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
+    if (action === "move") {
+        const differenceX = position.x - startPointerX;
+        const differenceY = position.y - startPointerY;
 
-    const dx = (event.clientX - lastX) * scaleX;
-    const dy = (event.clientY - lastY) * scaleY;
+        photoX = startPhotoX + differenceX;
+        photoY = startPhotoY + differenceY;
+    }
 
-    offsetX += dx;
-    offsetY += dy;
+    if (action === "resize") {
+        resizeFromHandle(
+            activeHandle,
+            position.x,
+            position.y
+        );
+    }
 
-    lastX = event.clientX;
-    lastY = event.clientY;
-
-    draw();
+    drawEditor();
 });
 
 
-// STOP DRAGGING
+// KEEP THE ASPECT RATIO WHILE RESIZING
 
-canvas.addEventListener("pointerup", function() {
-    dragging = false;
+function resizeFromHandle(handle, pointerX, pointerY) {
+    let oppositeX;
+    let oppositeY;
+    let directionX;
+    let directionY;
+
+    if (handle === "topLeft") {
+        oppositeX = startPhotoX + startPhotoWidth;
+        oppositeY = startPhotoY + startPhotoHeight;
+        directionX = -1;
+        directionY = -1;
+    }
+
+    if (handle === "topRight") {
+        oppositeX = startPhotoX;
+        oppositeY = startPhotoY + startPhotoHeight;
+        directionX = 1;
+        directionY = -1;
+    }
+
+    if (handle === "bottomLeft") {
+        oppositeX = startPhotoX + startPhotoWidth;
+        oppositeY = startPhotoY;
+        directionX = -1;
+        directionY = 1;
+    }
+
+    if (handle === "bottomRight") {
+        oppositeX = startPhotoX;
+        oppositeY = startPhotoY;
+        directionX = 1;
+        directionY = 1;
+    }
+
+    const horizontalWidth = Math.abs(pointerX - oppositeX);
+    const verticalWidth =
+        Math.abs(pointerY - oppositeY) * photoAspectRatio;
+
+    /*
+    Use whichever movement produces the larger resize.
+    The corresponding height is calculated from the
+    original photograph's aspect ratio.
+    */
+    let newWidth = Math.max(
+        horizontalWidth,
+        verticalWidth,
+        minimumPhotoWidth
+    );
+
+    let newHeight = newWidth / photoAspectRatio;
+
+    if (directionX < 0) {
+        photoX = oppositeX - newWidth;
+    } else {
+        photoX = oppositeX;
+    }
+
+    if (directionY < 0) {
+        photoY = oppositeY - newHeight;
+    } else {
+        photoY = oppositeY;
+    }
+
+    photoWidth = newWidth;
+    photoHeight = newHeight;
+}
+
+
+// STOP INTERACTION
+
+function stopInteraction(event) {
+    action = null;
+    activeHandle = null;
+
+    if (
+        event &&
+        canvas.hasPointerCapture(event.pointerId)
+    ) {
+        canvas.releasePointerCapture(event.pointerId);
+    }
+}
+
+canvas.addEventListener("pointerup", stopInteraction);
+canvas.addEventListener("pointercancel", stopInteraction);
+
+
+// RESET BUTTON
+
+resetButton.addEventListener("click", function () {
+    resetPhoto();
 });
 
-canvas.addEventListener("pointercancel", function() {
-    dragging = false;
-});
 
+// DOWNLOAD FINAL IMAGE
 
-// DOWNLOAD
+downloadButton.addEventListener("click", function () {
+    if (!photo) return;
 
-downloadButton.addEventListener("click", function() {
-
-    draw();
+    /*
+    Draw the final version without transparency,
+    selection rectangle or handles.
+    */
+    drawComposition(false);
 
     const link = document.createElement("a");
 
@@ -193,9 +449,15 @@ downloadButton.addEventListener("click", function() {
     link.href = canvas.toDataURL("image/png");
 
     link.click();
+
+    /*
+    Restore the editing view directly after preparing
+    the downloaded file.
+    */
+    drawEditor();
 });
 
 
-// INITIAL DRAW
+// INITIAL VIEW
 
-draw();
+drawEditor();
