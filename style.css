@@ -119,14 +119,14 @@ h2 {
 
 .secondary-button {
     padding: 10px 14px;
-    border: 1px solid #ccd3d8;
+    border: 1px solid #13182D;
     border-radius: 7px;
     background: white;
     cursor: pointer;
 }
 
 .secondary-button:hover {
-    background: #f3f5f6;
+    background: #EAF2FA;
 }
 
 .privacy {
