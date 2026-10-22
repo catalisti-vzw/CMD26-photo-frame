@@ -1,41 +1,47 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-const photoUpload = document.getElementById("photoUpload");
+const photoInput = document.getElementById("photoInput");
 const zoomSlider = document.getElementById("zoom");
+const resetButton = document.getElementById("resetButton");
 const downloadButton = document.getElementById("downloadButton");
 
+const overlay = new Image();
+overlay.src = "square-format-twibbon.png";
+
 let photo = null;
+
 let zoom = 1;
+let offsetX = 0;
+let offsetY = 0;
+
+let dragging = false;
+let lastX = 0;
+let lastY = 0;
 
 
-/* Draw everything on the canvas */
+// DRAW CANVAS
 
-function drawCanvas() {
+function draw() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Background
-
-    ctx.fillStyle = "#e9eeee";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-
-    // Uploaded photo
+    // Draw uploaded photograph
 
     if (photo) {
 
-        const scale =
-            Math.max(
-                canvas.width / photo.width,
-                canvas.height / photo.height
-            ) * zoom;
+        const baseScale = Math.max(
+            canvas.width / photo.width,
+            canvas.height / photo.height
+        );
+
+        const scale = baseScale * zoom;
 
         const width = photo.width * scale;
         const height = photo.height * scale;
 
-        const x = (canvas.width - width) / 2;
-        const y = (canvas.height - height) / 2;
+        const x = (canvas.width - width) / 2 + offsetX;
+        const y = (canvas.height - height) / 2 + offsetY;
 
         ctx.drawImage(
             photo,
@@ -44,107 +50,152 @@ function drawCanvas() {
             width,
             height
         );
-
     }
 
+    // Draw CMD26 artwork on top
 
-    // Temporary CMD26 frame
-
-    ctx.fillStyle = "rgba(0, 140, 119, 0.92)";
-    ctx.fillRect(0, 0, canvas.width, 120);
-
-    ctx.fillRect(
-        0,
-        canvas.height - 120,
-        canvas.width,
-        120
-    );
-
-    ctx.fillStyle = "white";
-
-    ctx.font = "bold 40px Arial";
-    ctx.fillText(
-        "CATALISTI & MOONSHOT DAY 2026",
-        45,
-        75
-    );
-
-    ctx.font = "28px Arial";
-    ctx.fillText(
-        "THE NEXT DECADE",
-        45,
-        canvas.height - 48
-    );
-
+    if (overlay.complete) {
+        ctx.drawImage(
+            overlay,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+    }
 }
 
 
-/* Upload photo */
+// LOAD OVERLAY
 
-photoUpload.addEventListener("change", function(event) {
+overlay.onload = draw;
+
+
+// UPLOAD PHOTO
+
+photoInput.addEventListener("change", function(event) {
 
     const file = event.target.files[0];
 
-    if (!file) {
-        return;
-    }
+    if (!file) return;
 
     const reader = new FileReader();
 
-    reader.onload = function(event) {
+    reader.onload = function(e) {
 
-        const image = new Image();
+        const img = new Image();
 
-        image.onload = function() {
+        img.onload = function() {
 
-            photo = image;
+            photo = img;
 
             zoom = 1;
+            offsetX = 0;
+            offsetY = 0;
+
             zoomSlider.value = 1;
 
             downloadButton.disabled = false;
 
-            drawCanvas();
-
+            draw();
         };
 
-        image.src = event.target.result;
-
+        img.src = e.target.result;
     };
 
     reader.readAsDataURL(file);
-
 });
 
 
-/* Zoom */
+// ZOOM
 
 zoomSlider.addEventListener("input", function() {
 
-    zoom = Number(this.value);
+    zoom = parseFloat(this.value);
 
-    drawCanvas();
-
+    draw();
 });
 
 
-/* Download */
+// RESET
+
+resetButton.addEventListener("click", function() {
+
+    zoom = 1;
+    offsetX = 0;
+    offsetY = 0;
+
+    zoomSlider.value = 1;
+
+    draw();
+});
+
+
+// START DRAGGING
+
+canvas.addEventListener("pointerdown", function(event) {
+
+    if (!photo) return;
+
+    dragging = true;
+
+    lastX = event.clientX;
+    lastY = event.clientY;
+
+    canvas.setPointerCapture(event.pointerId);
+});
+
+
+// DRAG PHOTO
+
+canvas.addEventListener("pointermove", function(event) {
+
+    if (!dragging || !photo) return;
+
+    const rect = canvas.getBoundingClientRect();
+
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    const dx = (event.clientX - lastX) * scaleX;
+    const dy = (event.clientY - lastY) * scaleY;
+
+    offsetX += dx;
+    offsetY += dy;
+
+    lastX = event.clientX;
+    lastY = event.clientY;
+
+    draw();
+});
+
+
+// STOP DRAGGING
+
+canvas.addEventListener("pointerup", function() {
+    dragging = false;
+});
+
+canvas.addEventListener("pointercancel", function() {
+    dragging = false;
+});
+
+
+// DOWNLOAD
 
 downloadButton.addEventListener("click", function() {
 
-    drawCanvas();
+    draw();
 
     const link = document.createElement("a");
 
     link.download = "CMD26-profile-picture.png";
-
     link.href = canvas.toDataURL("image/png");
 
     link.click();
-
 });
 
 
-/* Initial canvas */
+// INITIAL DRAW
 
-drawCanvas();
+draw();
