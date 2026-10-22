@@ -338,44 +338,93 @@ canvas.addEventListener("pointerdown", function (event) {
     canvas.setPointerCapture(event.pointerId);
 });
 
-
-// MOVE 
+// MOVE, RESIZE AND CURSOR
 
 canvas.addEventListener("pointermove", function (event) {
-    if (!action || !photo) return;
-
-    event.preventDefault();
+    if (!photo) {
+        canvas.style.cursor = "default";
+        return;
+    }
 
     const position = getCanvasPosition(event);
 
+    // Nothing is currently being dragged
+    if (!action) {
+        const hoveredHandle = getHandleAtPosition(
+            position.x,
+            position.y
+        );
+
+        // Top-left and bottom-right corners
+        if (
+            hoveredHandle === "topLeft" ||
+            hoveredHandle === "bottomRight"
+        ) {
+            canvas.style.cursor = "nwse-resize";
+        }
+
+        // Top-right and bottom-left corners
+        else if (
+            hoveredHandle === "topRight" ||
+            hoveredHandle === "bottomLeft"
+        ) {
+            canvas.style.cursor = "nesw-resize";
+        }
+
+        // Pointer is somewhere inside the photograph
+        else if (isInsidePhoto(position.x, position.y)) {
+            canvas.style.cursor = "move";
+        }
+
+        // Pointer is outside the photograph
+        else {
+            canvas.style.cursor = "default";
+        }
+
+        return;
+    }
+
+    event.preventDefault();
+
+    // User is moving the photograph
     if (action === "move") {
         const differenceX = position.x - startPointerX;
         const differenceY = position.y - startPointerY;
 
         photoX = startPhotoX + differenceX;
         photoY = startPhotoY + differenceY;
+
+        canvas.style.cursor = "grabbing";
     }
 
+    // User is resizing the photograph
     if (action === "resize") {
         resizeFromHandle(
             activeHandle,
             position.x,
             position.y
         );
+
+        if (
+            activeHandle === "topLeft" ||
+            activeHandle === "bottomRight"
+        ) {
+            canvas.style.cursor = "nwse-resize";
+        } else {
+            canvas.style.cursor = "nesw-resize";
+        }
     }
 
     drawEditor();
 });
-
-// RESIZE
-
-canvas.addEventListener("pointermove", updateCursor);
 
 canvas.addEventListener("pointerleave", function () {
     if (!action) {
         canvas.style.cursor = "default";
     }
 });
+
+
 
 // KEEP THE ASPECT RATIO WHILE RESIZING
 
