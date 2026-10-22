@@ -103,13 +103,15 @@ h2 {
 
 .upload-button:hover,
 .download-button:hover {
+    color: #FFFFFF
     background: #21386C;
 }
 
 .download-button:disabled {
-    color: #FFFFFF;
+    color: #13182D;
     background: #EAF2FA;
     cursor: not-allowed;
+    opacity: 0.55;
 }
 
 #zoom {
@@ -121,8 +123,8 @@ h2 {
     width: 100%;
     padding: 15px;
     background: #ffffff;
-    color: #21386C;
-    border: 2px solid #21386C;
+    color: #13182D;
+    border: 2px solid #13182D;
     border-radius: 8px;
     font-size: 16px;
     font-weight: bold;
@@ -130,7 +132,7 @@ h2 {
 }
 
 #resetButton:hover {
-    background: #f0faf8;
+    background: #EAF2FA;
 }
 
 .privacy {
@@ -146,20 +148,37 @@ h2 {
 }
 
 .share-text {
-    background: #f5f7f8;
-    border: 1px solid #e0e5e8;
+    background: #EAF2FA;
+    border: 1px solid #D4E3F2;
     border-radius: 8px;
     padding: 14px;
     margin: 15px 0;
     font-size: 14px;
     line-height: 1.5;
-    color: #34404a;
+    color: #13182D;
 }
 
 .share-button {
     width: 100%;
+    padding: 15px;
     margin-bottom: 10px;
-    font-size: 15px;
+
+    background: #EAF2FA;
+    color: #13182D;
+
+    border: 2px solid #EAF2FA;
+    border-radius: 8px;
+
+    font-size: 16px;
+    font-weight: bold;
+
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.share-button:hover {
+    background: #DCE9F5;
+    border-color: #DCE9F5;
 }
 
 .linkedin-button {
