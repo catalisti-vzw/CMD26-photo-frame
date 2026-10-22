@@ -135,6 +135,46 @@ h2 {
     line-height: 1.4;
 }
 
+.share-section {
+    border-top: 1px solid #e2e7ea;
+    padding-top: 28px;
+}
+
+.share-text {
+    background: #f5f7f8;
+    border: 1px solid #e0e5e8;
+    border-radius: 8px;
+    padding: 14px;
+    margin: 15px 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #34404a;
+}
+
+.share-button {
+    width: 100%;
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+.linkedin-button {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    border-radius: 8px;
+    background: #0a66c2;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.linkedin-button:hover {
+    background: #004182;
+}
+
 
 /* Mobile */
 
