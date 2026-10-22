@@ -35,7 +35,7 @@ const handleRadius = 17;
 const minimumPhotoWidth = 120;
 
 // The overlay opacity shown while editing
-const editingOverlayOpacity = 0.65;
+const editingOverlayOpacity = 0.80;
 
 
 // LOAD THE CMD26 OVERLAY
