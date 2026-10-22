@@ -3,84 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>CMD26 Photo Frame</title>
-
+    <title>CMD26 Photo Frame Generator</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <main>
+<div class="container">
 
-        <div class="intro">
-            <p class="label">CATALISTI & MOONSHOT FLANDERS</p>
+    <div class="intro">
+        <h1>Create your CMD26 profile picture</h1>
+        <p>
+            Upload your photo, position it inside the frame and download
+            your personalised Catalisti & Moonshot Day 2026 image.
+        </p>
+    </div>
 
-            <h1>Create your CMD26 profile picture</h1>
+    <div class="generator">
 
-            <p class="subtitle">
-                Upload your photo, adjust it and download your
-                Catalisti & Moonshot Day 2026 profile picture.
-            </p>
+        <div class="preview">
+            <canvas id="canvas" width="1080" height="1080"></canvas>
         </div>
 
-        <div class="generator">
+        <div class="controls">
 
-            <div class="preview">
-                <canvas id="canvas" width="1080" height="1080"></canvas>
+            <div class="control-section">
+                <h2>1. Upload your photo</h2>
+
+                <label class="upload-button">
+                    Choose photo
+                    <input
+                        type="file"
+                        id="photoInput"
+                        accept="image/*"
+                        hidden
+                    >
+                </label>
             </div>
 
-            <div class="controls">
+            <div class="control-section" id="adjustControls">
 
-                <section>
-                    <h2>1. Upload your photo</h2>
+                <h2>2. Position your photo</h2>
 
-                    <label class="upload-button">
-                        Choose photo
-                        <input
-                            type="file"
-                            id="photoUpload"
-                            accept="image/*"
-                            hidden
-                        >
-                    </label>
-                </section>
+                <p class="help">
+                    Drag your photo to position it inside the circle.
+                </p>
 
-                <section>
-                    <h2>2. Adjust your photo</h2>
+                <label for="zoom">
+                    Zoom
+                </label>
 
-                    <label for="zoom">Zoom</label>
+                <input
+                    type="range"
+                    id="zoom"
+                    min="1"
+                    max="3"
+                    step="0.01"
+                    value="1"
+                >
 
-                    <input
-                        type="range"
-                        id="zoom"
-                        min="1"
-                        max="3"
-                        step="0.01"
-                        value="1"
-                    >
-                </section>
+                <button id="resetButton" class="secondary-button">
+                    Reset position
+                </button>
 
-                <section>
-                    <h2>3. Download</h2>
+            </div>
 
-                    <button id="downloadButton" disabled>
-                        Download image
-                    </button>
-                </section>
+            <div class="control-section">
+
+                <h2>3. Download</h2>
+
+                <button id="downloadButton" class="download-button" disabled>
+                    Download image
+                </button>
 
                 <p class="privacy">
-                    Your photo is processed locally in your browser
-                    and is not uploaded to our server.
+                    Your photo is processed locally in your browser and is not uploaded to Catalisti.
                 </p>
 
             </div>
 
         </div>
 
-    </main>
+    </div>
 
-    <script src="script.js"></script>
+</div>
+
+<script src="script.js"></script>
 
 </body>
 </html>
