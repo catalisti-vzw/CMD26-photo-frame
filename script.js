@@ -97,8 +97,24 @@ function drawComposition(editing) {
 
     // Uploaded photograph
     if (photo) {
+        ctx.save();
+
+        //Make the uploaded photo black and white
+        ctx.filter = "grayscale(100%) contrast(110%)";
+        
         ctx.drawImage(
             photo,
+            photoX,
+            photoY,
+            photoWidth,
+            photoHeight
+        );
+
+        // Add blue filter over photo
+        ctx.globalCompositeOperation = "multiply";
+        ctx.fillStyle = "#168FDB";
+    
+        ctx.fillRect(
             photoX,
             photoY,
             photoWidth,
@@ -169,7 +185,7 @@ function drawSelectionControls() {
         ctx.fill();
 
         ctx.lineWidth = 6;
-        ctx.strokeStyle = "#009984";
+        ctx.strokeStyle = "#13182D";
         ctx.stroke();
     });
 
