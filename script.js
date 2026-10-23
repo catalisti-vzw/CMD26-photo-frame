@@ -120,8 +120,8 @@ function createBluePhoto(image) {
     };
 
     const light = {
-        r: 170,
-        g: 220,
+        r: 235,
+        g: 245,
         b: 255
     };
 
