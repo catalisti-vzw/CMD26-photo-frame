@@ -95,34 +95,38 @@ function drawComposition(editing) {
     ctx.fillStyle = "#eeeeee";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Uploaded photograph
-    if (photo) {
-        ctx.save();
+// Uploaded photograph
+if (photo) {
+    ctx.save();
 
-        //Make the uploaded photo black and white
-        ctx.filter = "grayscale(100%) contrast(110%)";
-        
-        ctx.drawImage(
-            photo,
-            photoX,
-            photoY,
-            photoWidth,
-            photoHeight
-        );
+    // 1. Convert photograph to grayscale
+    ctx.filter = "grayscale(100%) contrast(115%)";
 
-        // Add blue filter over photo
-        ctx.globalCompositeOperation = "multiply";
-        ctx.fillStyle = "#168FDB";
-    
-        ctx.fillRect(
-            photoX,
-            photoY,
-            photoWidth,
-            photoHeight
-        );
-        ctx.restore();
-    }
+    ctx.drawImage(
+        photo,
+        photoX,
+        photoY,
+        photoWidth,
+        photoHeight
+    );
 
+    // 2. Remove filter before adding colour
+    ctx.filter = "none";
+
+    // 3. Colourise the grayscale photograph
+    ctx.globalCompositeOperation = "color";
+    ctx.fillStyle = "#168FDB";
+
+    ctx.fillRect(
+        photoX,
+        photoY,
+        photoWidth,
+        photoHeight
+    );
+
+    // 4. Reset all canvas effects
+    ctx.restore();
+}
     // CMD26 overlay
     if (overlay.complete && overlay.naturalWidth > 0) {
         ctx.save();
