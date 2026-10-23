@@ -85,6 +85,77 @@ function drawEditor() {
     drawComposition(true);
 }
 
+// CREATE A BLUE-TINTED VERSION OF THE UPLOADED PHOTO
+function createBluePhoto(image) {
+    const tempCanvas = document.createElement("canvas");
+    const tempCtx = tempCanvas.getContext("2d");
+
+    tempCanvas.width = image.naturalWidth || image.width;
+    tempCanvas.height = image.naturalHeight || image.height;
+
+    // Draw original image onto temporary canvas
+    tempCtx.drawImage(
+        image,
+        0,
+        0,
+        tempCanvas.width,
+        tempCanvas.height
+    );
+
+    // Get the pixels
+    const imageData = tempCtx.getImageData(
+        0,
+        0,
+        tempCanvas.width,
+        tempCanvas.height
+    );
+
+    const data = imageData.data;
+
+    // Dark and light colours of the blue duotone
+    const dark = {
+        r: 10,
+        g: 43,
+        b: 92
+    };
+
+    const light = {
+        r: 105,
+        g: 211,
+        b: 245
+    };
+
+    for (let i = 0; i < data.length; i += 4) {
+
+        // Convert original pixel to luminance
+        const brightness =
+            (data[i] * 0.299 +
+             data[i + 1] * 0.587 +
+             data[i + 2] * 0.114) / 255;
+
+        // Increase contrast slightly
+        let adjusted =
+            (brightness - 0.5) * 1.15 + 0.5;
+
+        adjusted = Math.max(0, Math.min(1, adjusted));
+
+        // Map dark pixels to navy and light pixels to cyan
+        data[i] =
+            dark.r + (light.r - dark.r) * adjusted;
+
+        data[i + 1] =
+            dark.g + (light.g - dark.g) * adjusted;
+
+        data[i + 2] =
+            dark.b + (light.b - dark.b) * adjusted;
+
+        // Leave alpha unchanged
+    }
+
+    tempCtx.putImageData(imageData, 0, 0);
+
+    return tempCanvas;
+}
 
 // DRAW THE COMPLETE COMPOSITION
 
@@ -97,35 +168,16 @@ function drawComposition(editing) {
 
 // Uploaded photograph
 if (photo) {
-    ctx.save();
 
-    // 1. Convert photograph to grayscale
-    ctx.filter = "grayscale(100%) contrast(115%)";
+    const bluePhoto = createBluePhoto(photo);
 
     ctx.drawImage(
-        photo,
+        bluePhoto,
         photoX,
         photoY,
         photoWidth,
         photoHeight
     );
-
-    // 2. Remove filter before adding colour
-    ctx.filter = "none";
-
-    // 3. Colourise the grayscale photograph
-    ctx.globalCompositeOperation = "color";
-    ctx.fillStyle = "#168FDB";
-
-    ctx.fillRect(
-        photoX,
-        photoY,
-        photoWidth,
-        photoHeight
-    );
-
-    // 4. Reset all canvas effects
-    ctx.restore();
 }
     // CMD26 overlay
     if (overlay.complete && overlay.naturalWidth > 0) {
