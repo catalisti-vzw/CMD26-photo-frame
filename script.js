@@ -114,15 +114,15 @@ function createBluePhoto(image) {
 
     // Dark and light colours of the blue duotone
     const dark = {
-        r: 10,
-        g: 43,
-        b: 92
+        r: 15,
+        g: 55,
+        b: 115
     };
 
     const light = {
-        r: 105,
-        g: 211,
-        b: 245
+        r: 220,
+        g: 240,
+        b: 255
     };
 
     for (let i = 0; i < data.length; i += 4) {
@@ -135,7 +135,7 @@ function createBluePhoto(image) {
 
         // Increase contrast slightly
         let adjusted =
-            (brightness - 0.5) * 1.15 + 0.5;
+            (brightness - 0.5) * 1.08 + 0.70;
 
         adjusted = Math.max(0, Math.min(1, adjusted));
 
