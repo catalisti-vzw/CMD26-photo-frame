@@ -11,6 +11,7 @@ const shareText = document.getElementById("shareText");
 const overlay = new Image();
 
 let photo = null;
+let bluePhoto = null;
 
 // Position and size of the uploaded photograph
 let photoX = 0;
@@ -114,15 +115,15 @@ function createBluePhoto(image) {
 
     // Dark and light colours of the blue duotone
     const dark = {
-        r: 10,
-        g: 50,
-        b: 125
+        r: 5,
+        g: 38,
+        b: 115
     };
 
     const light = {
-        r: 235,
-        g: 245,
-        b: 255
+        r: 232,
+        g: 241,
+        b: 250
     };
 
     for (let i = 0; i < data.length; i += 4) {
@@ -167,10 +168,7 @@ function drawComposition(editing) {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 // Uploaded photograph
-if (photo) {
-
-    const bluePhoto = createBluePhoto(photo);
-
+if (bluePhoto) {
     ctx.drawImage(
         bluePhoto,
         photoX,
@@ -355,14 +353,17 @@ photoInput.addEventListener("change", function (event) {
         const image = new Image();
 
         image.onload = function () {
-            photo = image;
-
-            photoAspectRatio = photo.width / photo.height;
-
-            resetPhoto();
-
-            downloadButton.disabled = false;
-        };
+        photo = image;
+    
+        photoAspectRatio = photo.width / photo.height;
+    
+        // Create the duotone version ONCE
+        bluePhoto = createBluePhoto(photo);
+    
+        resetPhoto();
+    
+        downloadButton.disabled = false;
+    };
 
         image.src = readerEvent.target.result;
     };
