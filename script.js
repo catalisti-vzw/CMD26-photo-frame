@@ -136,11 +136,13 @@ function createBluePhoto(image) {
 
         // Increase contrast slightly
         let adjusted =
-            (brightness - 0.5) * 1.08 + 0.70;
+            (brightness - 0.5) * 1.20 + 0.68;
 
         adjusted = Math.max(0, Math.min(1, adjusted));
+        
 
         // Map dark pixels to navy and light pixels to cyan
+        adjusted = Math.pow(adjusted, 0.88);
         data[i] =
             dark.r + (light.r - dark.r) * adjusted;
 
