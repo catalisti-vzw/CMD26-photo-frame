@@ -120,6 +120,7 @@ function drawComposition(editing) {
             photoWidth,
             photoHeight
         );
+        ctx.restore();
     }
 
     // CMD26 overlay
