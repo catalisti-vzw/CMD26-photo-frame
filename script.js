@@ -114,14 +114,14 @@ function createBluePhoto(image) {
 
     // Dark and light colours of the blue duotone
     const dark = {
-        r: 15,
-        g: 55,
-        b: 115
+        r: 10,
+        g: 50,
+        b: 125
     };
 
     const light = {
-        r: 220,
-        g: 240,
+        r: 170,
+        g: 220,
         b: 255
     };
 
